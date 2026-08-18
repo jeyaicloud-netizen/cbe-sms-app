@@ -18,22 +18,16 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Organize Project Structure
+    - name: Setup Android Project
       run: |
-        # 1. መዋቅሩን በአግባቡ ማደራጀት
         mkdir -p app/src/main/assets
         mkdir -p app/src/main/java/com/example/cbeapp
-
-        # 2. ፋይሎችን ወደ ቦታቸው መውሰድ (root ውስጥ ካሉት)
-        mv *.java app/src/main/java/com/example/cbeapp/ 2>/dev/null || true
-        mv AndroidManifest.xml app/src/main/ 2>/dev/null || true
         mv *.html app/src/main/assets/ 2>/dev/null || true
         mv *.css app/src/main/assets/ 2>/dev/null || true
         mv *.png app/src/main/assets/ 2>/dev/null || true
 
-        # 3. የ Gradle ፋይሎችን ማስተካከል
+        # Root build.gradle
         cat << 'EOF' > build.gradle
-        // Top-level build file
         buildscript {
             repositories { google(); mavenCentral() }
             dependencies { classpath 'com.android.tools.build:gradle:8.1.1' }
@@ -41,35 +35,32 @@ jobs:
         allprojects { repositories { google(); mavenCentral() } }
         EOF
 
+        # settings.gradle
         cat << 'EOF' > settings.gradle
         rootProject.name = "CBE App"
         include ':app'
         EOF
 
-        # 4. app/build.gradle መፍጠር
+        # app/build.gradle (ቀለል ያለ)
         cat << 'EOF' > app/build.gradle
         apply plugin: 'com.android.application'
         android {
             namespace 'com.example.cbeapp'
-            compileSdk 34
+            compileSdk 33
             defaultConfig {
                 applicationId "com.example.cbeapp"
                 minSdk 21
-                targetSdk 34
+                targetSdk 33
             }
-        }
-        dependencies {
-            implementation 'androidx.appcompat:appcompat:1.6.1'
         }
         EOF
 
     - name: Build Debug APK
-      run: |
-        # Gradle-ን መጫን እና መገንባት
-        gradle assembleDebug --no-daemon
+      run: gradle assembleDebug --no-daemon
 
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-        name: CBE-App-APK
+     የተለየ   name: CBE-App-APK
         path: app/build/outputs/apk/debug/app-debug.apk
+
