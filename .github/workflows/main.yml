@@ -61,6 +61,5 @@ jobs:
     - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
-     የተለየ   name: CBE-App-APK
+        name: CBE-App-APK
         path: app/build/outputs/apk/debug/app-debug.apk
-
