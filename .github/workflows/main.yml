@@ -18,40 +18,35 @@ jobs:
         java-version: '17'
         distribution: 'temurin'
 
-    - name: Setup Android Project Structure
+    - name: Organize Project Structure
       run: |
+        # 1. መዋቅሩን በአግባቡ ማደራጀት
         mkdir -p app/src/main/assets
         mkdir -p app/src/main/java/com/example/cbeapp
+
+        # 2. ፋይሎችን ወደ ቦታቸው መውሰድ (root ውስጥ ካሉት)
+        mv *.java app/src/main/java/com/example/cbeapp/ 2>/dev/null || true
+        mv AndroidManifest.xml app/src/main/ 2>/dev/null || true
         mv *.html app/src/main/assets/ 2>/dev/null || true
         mv *.css app/src/main/assets/ 2>/dev/null || true
         mv *.png app/src/main/assets/ 2>/dev/null || true
 
-        # Root build.gradle
+        # 3. የ Gradle ፋይሎችን ማስተካከል
         cat << 'EOF' > build.gradle
+        // Top-level build file
         buildscript {
-            repositories {
-                google()
-                mavenCentral()
-            }
-            dependencies {
-                classpath 'com.android.tools.build:gradle:8.1.1'
-            }
+            repositories { google(); mavenCentral() }
+            dependencies { classpath 'com.android.tools.build:gradle:8.1.1' }
         }
-        allprojects {
-            repositories {
-                google()
-                mavenCentral()
-            }
-        }
+        allprojects { repositories { google(); mavenCentral() } }
         EOF
 
-        # settings.gradle
         cat << 'EOF' > settings.gradle
         rootProject.name = "CBE App"
         include ':app'
         EOF
 
-        # app/build.gradle
+        # 4. app/build.gradle መፍጠር
         cat << 'EOF' > app/build.gradle
         apply plugin: 'com.android.application'
         android {
@@ -61,8 +56,6 @@ jobs:
                 applicationId "com.example.cbeapp"
                 minSdk 21
                 targetSdk 34
-                versionCode 1
-                versionName "1.0"
             }
         }
         dependencies {
@@ -70,13 +63,12 @@ jobs:
         }
         EOF
 
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@v3
-
     - name: Build Debug APK
-      run: gradle assembleDebug --no-daemon
+      run: |
+        # Gradle-ን መጫን እና መገንባት
+        gradle assembleDebug --no-daemon
 
-    - name: Upload Built APK Artifact
+    - name: Upload APK
       uses: actions/upload-artifact@v4
       with:
         name: CBE-App-APK
