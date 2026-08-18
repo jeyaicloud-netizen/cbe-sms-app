@@ -26,21 +26,24 @@ jobs:
         mv *.css app/src/main/assets/ 2>/dev/null || true
         mv *.png app/src/main/assets/ 2>/dev/null || true
 
+        # Root build.gradle
         cat << 'EOF' > build.gradle
-        buildscript {
-            repositories { google(); mavenCentral() }
-            dependencies { classpath 'com.android.tools.build:gradle:8.1.1' }
+        plugins {
+            id 'com.android.application' version '8.1.1' apply false
         }
-        allprojects { repositories { google(); mavenCentral() } }
         EOF
 
+        # settings.gradle
         cat << 'EOF' > settings.gradle
         rootProject.name = "CBE App"
         include ':app'
         EOF
 
+        # app/build.gradle
         cat << 'EOF' > app/build.gradle
-        apply plugin: 'com.android.application'
+        plugins {
+            id 'com.android.application'
+        }
         android {
             namespace 'com.example.cbeapp'
             compileSdk 34
@@ -57,11 +60,9 @@ jobs:
         }
         EOF
 
-    # Gradle-ን እዚህ እንጭናለን
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@v3
 
-    # የ gradle ትዕዛዝን እንጠቀም
     - name: Build Debug APK
       run: gradle assembleDebug --no-daemon
 
