@@ -20,16 +20,12 @@ jobs:
 
     - name: Setup Android Project Structure
       run: |
-        # አስፈላጊ የሆኑትን ማውጫዎች ይፍጠሩ
         mkdir -p app/src/main/assets
         mkdir -p app/src/main/java/com/example/cbeapp
-
-        # ፋይሎችን ወደ ቦታቸው ይውሰዱ
         mv *.html app/src/main/assets/ 2>/dev/null || true
         mv *.css app/src/main/assets/ 2>/dev/null || true
         mv *.png app/src/main/assets/ 2>/dev/null || true
 
-        # build.gradle ፋይል
         cat << 'EOF' > build.gradle
         buildscript {
             repositories { google(); mavenCentral() }
@@ -38,15 +34,13 @@ jobs:
         allprojects { repositories { google(); mavenCentral() } }
         EOF
 
-        # settings.gradle ፋይል
         cat << 'EOF' > settings.gradle
         rootProject.name = "CBE App"
         include ':app'
         EOF
 
-        # app/build.gradle ፋይል
         cat << 'EOF' > app/build.gradle
-        plugins { id 'com.android.application' }
+        apply plugin: 'com.android.application'
         android {
             namespace 'com.example.cbeapp'
             compileSdk 34
@@ -63,10 +57,13 @@ jobs:
         }
         EOF
 
+    # Gradle-ን እዚህ እንጭናለን
+    - name: Setup Gradle
+      uses: gradle/actions/setup-gradle@v3
+
+    # የ gradle ትዕዛዝን እንጠቀም
     - name: Build Debug APK
-      run: |
-        chmod +x gradlew || true
-        ./gradlew assembleDebug --no-daemon
+      run: gradle assembleDebug --no-daemon
 
     - name: Upload Built APK Artifact
       uses: actions/upload-artifact@v4
